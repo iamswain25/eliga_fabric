@@ -131,7 +131,9 @@ function eliga_fabric(options) {
         this.canvasHeight = this.canvasHeight == 0 ? Math.floor(this.canvasWidth / this.screenRatio) : this.canvasHeight;
         this.lastDragoverTarget = null;
         if (this.noScrollSize) {
-            var noScrollHeight = visualViewport.height - 51 - 50 - 5; // 하단 바, 패딩, 보더.. (패딩,보더는 없어도 될 듯.)
+            console.log(window);
+            var height = typeof visualViewport === "object" ? visualViewport.height : window.innerHeight;
+            var noScrollHeight = height - 51 - 50 - 5; // 하단 바, 패딩, 보더.. (패딩,보더는 없어도 될 듯.)
             this.canvasHeight = this.canvasHeight > noScrollHeight ? noScrollHeight : this.canvasHeight;
             this.canvasWidth = Math.floor(this.canvasHeight * this.screenRatio);
         }
