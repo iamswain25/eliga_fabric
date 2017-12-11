@@ -12,6 +12,7 @@ article {padding:25px 50px; background:#f7f7f7; min-height:700px;}
 .eliga_fabric .layout_btn_control li:hover {opacity:0.6;}
 .shake {animation : shake 0.82s;}
 .info-drop:hover {animation: shake 0.82s;}
+img:hover {opacity:0.6;}
 
 @keyframes shake {	
     0%, 100% {    transform: translate3d(0, 0, 0);  }

@@ -9,7 +9,7 @@ function eliga_fabric(options) {
             height: 1080,
             noScrollSize: true,
             allowFileDrop: true,
-            id: "#eliga_fabric"
+            id: "eliga_fabric"
         },
 
         rectDomStructure: function (viewer) {
@@ -27,6 +27,7 @@ function eliga_fabric(options) {
                     var canvasDom = $("<canvas>", { width: viewer.canvasWidth, height: viewer.canvasHeight }).appendTo(canvasWrap);
                     viewer.canvas = new fabric.Canvas(canvasDom[0], {
                         preserveObjectStacking: true, selection: false, stopContextMenu: viewer.rightClick, fireRightClick: viewer.rightClick
+
                     });
                     viewer.canvas.viewer = viewer;
                     viewer.canvas.setWidth(viewer.canvasWidth);
@@ -51,22 +52,25 @@ function eliga_fabric(options) {
                 }
                 viewer.popupRightClick = $("<div>", {
                     "class": "popupRightClick", css: {
-                        width: 200, height: "auto", position: "absolute", backgroundColor: "yellow", display: "none"
+                        width: 200, height: "auto", position: "absolute", backgroundColor: "yellow", display: "none", padding: 5
                     }
                 }).appendTo(eligaScreenDiv);
+                viewer.popupRightClick.off = function (e) { this.parentElement.parentElement.style.display = "none";}
                 {
-                    var dlRightClick = $("<dl>",{class: "dlRightClick"}).appendTo(viewer.popupRightClick);
+                    var titleRightClick = $("<h1>", {text: "Attributes", css: {height: 29}}).appendTo(viewer.popupRightClick);
+                    var closeButton = $("<img>", { align: "right", src: "imgs/common/popup_btn_close_p.png", css: { userSelect: "none", "-webkit-user-drag": "none" } }).appendTo(titleRightClick).click(viewer.popupRightClick.off);
+                    var dlRightClick = $("<dl>", { class: "dlRightClick"/* , css: {overflow: "hidden"} */}).appendTo(viewer.popupRightClick);
                     {
-                        $("<dt>", { css: {float: "left", width: "50%", fontWeight: "bold"}, title: "layerOrder", text: "layerOrder"}).appendTo(dlRightClick);
-                        $("<dd>", { css: {float: "left", width: "50%", fontWeight: "bold"}, title: "layerOrder", class: "layerOrder"}).appendTo(dlRightClick);
-                        $("<dt>", { css: {float: "left", width: "50%"}, title: "layerTop", text: "layerTop"}).appendTo(dlRightClick);
-                        $("<dd>", { css: {float: "left", width: "50%"}, title: "layerTop", class: "layerTop"}).appendTo(dlRightClick);
-                        $("<dt>", { css: {float: "left", width: "50%"}, title: "layerLeft", text: "layerLeft"}).appendTo(dlRightClick);
-                        $("<dd>", { css: {float: "left", width: "50%"}, title: "layerLeft", class: "layerLeft"}).appendTo(dlRightClick);
-                        $("<dt>", { css: {float: "left", width: "50%"}, title: "layerWidth", text: "layerWidth"}).appendTo(dlRightClick);
-                        $("<dd>", { css: {float: "left", width: "50%"}, title: "layerWidth", class: "layerWidth"}).appendTo(dlRightClick);
-                        $("<dt>", { css: {float: "left", width: "50%"}, title: "layerHeight", text: "layerHeight"}).appendTo(dlRightClick);
-                        $("<dd>", { css: {float: "left", width: "50%"}, title: "layerHeight", class: "layerHeight"}).appendTo(dlRightClick);
+                        $("<dt>", { css: { float: "left", width: "50%", fontWeight: "bold" }, title: "layerOrder", text: "layerOrder" }).appendTo(dlRightClick);
+                        $("<dd>", { css: { float: "left", width: "50%", fontWeight: "bold" }, title: "layerOrder", class: "layerOrder" }).appendTo(dlRightClick);
+                        $("<dt>", { css: { float: "left", width: "50%" }, title: "layerTop", text: "layerTop" }).appendTo(dlRightClick);
+                        $("<dd>", { css: { float: "left", width: "50%" }, title: "layerTop", class: "layerTop" }).appendTo(dlRightClick);
+                        $("<dt>", { css: { float: "left", width: "50%" }, title: "layerLeft", text: "layerLeft" }).appendTo(dlRightClick);
+                        $("<dd>", { css: { float: "left", width: "50%" }, title: "layerLeft", class: "layerLeft" }).appendTo(dlRightClick);
+                        $("<dt>", { css: { float: "left", width: "50%" }, title: "layerWidth", text: "layerWidth" }).appendTo(dlRightClick);
+                        $("<dd>", { css: { float: "left", width: "50%" }, title: "layerWidth", class: "layerWidth" }).appendTo(dlRightClick);
+                        $("<dt>", { css: { float: "left", width: "50%" }, title: "layerHeight", text: "layerHeight" }).appendTo(dlRightClick);
+                        $("<dd>", { css: { float: "left", width: "50%" }, title: "layerHeight", class: "layerHeight" }).appendTo(dlRightClick);
                     }
                 }
             }
@@ -115,15 +119,15 @@ function eliga_fabric(options) {
 (function ($e) {
     $e.Viewer = function (options) {
         $.extend(true, this, $e.DEFAULT_SETTINGS, options);
-        if ($(this.id).length < 1) {
+        if ($("#" + this.id).length < 1) {
             throw "no matching division id";
         }
         this.layerRemoveArr = new Array();
         this.edgeDetection = 40;
         this.rightClick = true;
         this.screenRatio = this.width / this.height;
-        this.canvasWidth = $(this.id).width() - 10; //좌우 보더 값 뺀다.
-        this.canvasHeight = $(this.id).height();
+        this.canvasWidth = $("#" + this.id).width() - 10; //좌우 보더 값 뺀다.
+        this.canvasHeight = $("#" + this.id).height();
         this.canvasHeight = this.canvasHeight == 0 ? Math.floor(this.canvasWidth / this.screenRatio) : this.canvasHeight;
         this.lastDragoverTarget = null;
         if (this.noScrollSize) {
@@ -133,7 +137,7 @@ function eliga_fabric(options) {
         }
         this.canvasRatioW = this.canvasWidth / this.width;
         this.canvasRatioH = this.canvasHeight / this.height;
-        $(this.id).append($e.rectDomStructure(this));
+        $("#" + this.id).append($e.rectDomStructure(this));
     };
 })(eliga_fabric);
 
@@ -299,11 +303,37 @@ function eliga_fabric(options) {
             },
             objectScaling: function (e) {
                 var tg = e.target, canvas = e.target.canvas, viewer = canvas.viewer;
+                // console.log(tg.__corner);
+                tg.__corner ? viewer.__corner = tg.__corner : null; //화면 바깥으로 나갈 시 0으로 된다...수동 메모리...
+                switch (tg.__corner) {
+                    case "mt": tg.scaleY = tg.top < 0 ? (tg.top + tg.getScaledHeight()) / 100 : tg.scaleY; break;
+                    case "ml": tg.scaleX = tg.left < 0 ? (tg.left + tg.getScaledWidth()) / 100 : tg.scaleX; break;
+                    case "mr": tg.scaleX = tg.left > canvas.width - tg.getScaledWidth() ? (canvas.width - tg.left) / 100 : tg.scaleX; break;
+                    case "mb": tg.scaleY = tg.top > canvas.height - tg.getScaledHeight() ? (canvas.height - tg.top) / 100 : tg.scaleY; break;
+                    case "tl":
+                        tg.scaleY = tg.top < 0 ? (tg.top + tg.getScaledHeight()) / 100 : tg.scaleY;
+                        tg.scaleX = tg.left < 0 ? (tg.left + tg.getScaledWidth()) / 100 : tg.scaleX;
+                        console.log(tg.__corner);
+                        break;
+                    case "tr":
+                        tg.scaleY = tg.top < 0 ? (tg.top + tg.getScaledHeight()) / 100 : tg.scaleY;
+                        tg.scaleX = tg.left > canvas.width - tg.getScaledWidth() ? (canvas.width - tg.left) / 100 : tg.scaleX;
+                        break;
+                    case "bl":
+                        tg.scaleX = tg.left < 0 ? (tg.left + tg.getScaledWidth()) / 100 : tg.scaleX;
+                        tg.scaleY = tg.top > canvas.height - tg.getScaledHeight() ? (canvas.height - tg.top) / 100 : tg.scaleY;
+                        break;
+                    case "br":
+                        tg.scaleY = tg.top > canvas.height - tg.getScaledHeight() ? (canvas.height - tg.top) / 100 : tg.scaleY;
+                        tg.scaleX = tg.left > canvas.width - tg.getScaledWidth() ? (canvas.width - tg.left) / 100 : tg.scaleX;
+                        break;
+                    case 0 : tg.__corner = viewer.__corner;
+                }
                 if (tg.top > canvas.height - tg.getScaledHeight()) tg.top = canvas.height - tg.getScaledHeight();
                 if (tg.left > canvas.width - tg.getScaledWidth()) tg.left = canvas.width - tg.getScaledWidth();
-                if (tg.top < 0) tg.top = 0;
-                if (tg.left < 0) tg.left = 0;
-                if (tg.getScaledWidth() > canvas.width) tg.scaleX = canvas.width / 100;
+                if (tg.top < 0) { tg.top = 0; }
+                if (tg.left < 0) { tg.left = 0; }
+                if (tg.getScaledWidth() > canvas.width) { tg.scaleX = canvas.width / 100; }
                 if (tg.scaleY > canvas.height / 100) tg.scaleY = canvas.height / 100;
                 $e.setRealPixelAndDomDrawing(tg);
             },
@@ -316,8 +346,8 @@ function eliga_fabric(options) {
                 var tg = e.target;
                 if (tg && e.button == 3) {
                     var canvas = tg.canvas, viewer = canvas.viewer;
-                    viewer.popupRightClick.css({ top: tg.oCoords.bl.y + 15, left: tg.oCoords.bl.x, display: "block"});
-                    // viewer.popupRightClick.show();
+                    $e.setRealPixelAndDomDrawing(tg);
+                    viewer.popupRightClick.show();
                 }
             }
         },
@@ -329,15 +359,18 @@ function eliga_fabric(options) {
             }, 820);
         },
         setRealPixelAndDomDrawing: function (tg) {
+            if(!tg) {return false;}
             var viewer = tg.canvas.viewer;
             var w = tg.getScaledWidth(), h = tg.getScaledHeight(), t = tg.top, l = tg.left;
             tg.layerWidth = Math.round(w * (1 / viewer.canvasRatioW));
             tg.layerHeight = Math.round(h * (1 / viewer.canvasRatioH));
             tg.layerLeft = Math.round(l * (1 / viewer.canvasRatioW));
             tg.layerTop = Math.round(t * (1 / viewer.canvasRatioH));
+            // tg.lockScalingX = false;
+            // tg.lockScalingY = false;
             tg.dom ? tg.dom.css({ width: w, height: h, top: t, left: l, display: "block" }) : $e.drawGroupDom(tg);
             if (viewer.popupRightClick) {
-                viewer.popupRightClick.css({ top: t + h + 15, left: l });
+                viewer.popupRightClick.css({ top: t + h + 15, left: l + 5 });
                 viewer.popupRightClick.find(".layerTop").text(tg.layerTop);
                 viewer.popupRightClick.find(".layerLeft").text(tg.layerLeft);
                 viewer.popupRightClick.find(".layerHeight").text(tg.layerHeight);
@@ -353,6 +386,9 @@ function eliga_fabric(options) {
                 canvas.getObjects()[i].dom.find("p.index").html(i + 1);
             }
             $e.setRealPixelAndDomDrawing(canvas.getActiveObject());
+        },
+        onBeforeScaleRotate: function (e) {
+            console.log(e);
         },
         addRect: function (viewer, rec) {
             if (typeof rec == "undefined") {
@@ -377,6 +413,8 @@ function eliga_fabric(options) {
             rec.borderColor = rec.borderColor || 'red';
             rec.cornerColor = rec.cornerColor || 'black';
             rec.lockRotation = true;
+            rec.lockScalingFlip = true;
+            rec.minScaleLimit = 0.5;
             rec.borderScaleFactor = rec.borderScaleFactor || 2;
             rec.originX = "left";
             rec.originY = "top";
