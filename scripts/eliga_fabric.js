@@ -2,6 +2,31 @@ function eliga_fabric(options) {
     'use strict';
     return new eliga_fabric.Viewer(options);
 }
+
+(function ($e) {
+    $e.Viewer = function (options) {
+        $.extend(true, this, $e.DEFAULT_SETTINGS, options);
+        if ($("#" + this.id).length < 1) {
+            throw "no matching division id";
+        }
+        this.screenRatio = this.width / this.height;
+        this.layerRemoveArr = new Array();
+        this.canvasWidth = this.canvasWidth ? this.canvasWidth : $("#" + this.id).width() - 10; //좌우 보더 값 뺀다.
+        this.canvasHeight = $("#" + this.id).height();
+        this.canvasHeight = this.canvasHeight == 0 ? Math.floor(this.canvasWidth / this.screenRatio) : this.canvasHeight;
+        this.lastDragoverTarget = null;
+        if (this.noScrollSize) {
+            var height = typeof visualViewport === "object" ? visualViewport.height : window.innerHeight;
+            var noScrollHeight = height - 51 - 50 - 5; // 하단 바, 패딩, 보더.. (패딩,보더는 없어도 될 듯.)
+            this.canvasHeight = this.canvasHeight > noScrollHeight ? noScrollHeight : this.canvasHeight;
+            this.canvasWidth = Math.floor(this.canvasHeight * this.screenRatio);
+        }
+        this.canvasRatioW = this.canvasWidth / this.width;
+        this.canvasRatioH = this.canvasHeight / this.height;
+        $("#" + this.id).append($e.rectDomStructure(this));
+    };
+})(eliga_fabric);
+
 (function ($e) {
     $.extend($e, {
         DEFAULT_SETTINGS: {
@@ -9,7 +34,10 @@ function eliga_fabric(options) {
             height: 1080,
             noScrollSize: true,
             allowFileDrop: true,
-            id: "eliga_fabric"
+            id: "eliga_fabric",
+            edgeDetection: 40,
+            rightClick: true,
+            syncCanvasMatrix: true
         },
 
         rectDomStructure: function (viewer) {
@@ -55,23 +83,24 @@ function eliga_fabric(options) {
                         width: 200, height: "auto", position: "absolute", backgroundColor: "yellow", display: "none", padding: 5
                     }
                 }).appendTo(eligaScreenDiv);
-                viewer.popupRightClick.off = function (e) { this.parentElement.parentElement.style.display = "none";}
+                viewer.popupRightClick.off = function (e) { this.parentElement.parentElement.style.display = "none"; }
                 {
-                    var titleRightClick = $("<h1>", {text: "Attributes", css: {height: 29}}).appendTo(viewer.popupRightClick);
+                    var titleRightClick = $("<h1>", { text: "Attributes", css: { height: 29 } }).appendTo(viewer.popupRightClick);
                     var closeButton = $("<img>", { align: "right", src: "imgs/common/popup_btn_close_p.png", css: { userSelect: "none", "-webkit-user-drag": "none" } }).appendTo(titleRightClick).click(viewer.popupRightClick.off);
-                    var dlRightClick = $("<dl>", { class: "dlRightClick"/* , css: {overflow: "hidden"} */}).appendTo(viewer.popupRightClick);
+                    var dlRightClick = $("<div>", { class: "dlRightClick" }).appendTo(viewer.popupRightClick);
                     {
-                        $("<dt>", { css: { float: "left", width: "50%", fontWeight: "bold" }, title: "layerOrder", text: "layerOrder" }).appendTo(dlRightClick);
-                        $("<dd>", { css: { float: "left", width: "50%", fontWeight: "bold" }, title: "layerOrder", class: "layerOrder" }).appendTo(dlRightClick);
-                        $("<dt>", { css: { float: "left", width: "50%" }, title: "layerTop", text: "layerTop" }).appendTo(dlRightClick);
-                        $("<dd>", { css: { float: "left", width: "50%" }, title: "layerTop", class: "layerTop" }).appendTo(dlRightClick);
-                        $("<dt>", { css: { float: "left", width: "50%" }, title: "layerLeft", text: "layerLeft" }).appendTo(dlRightClick);
-                        $("<dd>", { css: { float: "left", width: "50%" }, title: "layerLeft", class: "layerLeft" }).appendTo(dlRightClick);
-                        $("<dt>", { css: { float: "left", width: "50%" }, title: "layerWidth", text: "layerWidth" }).appendTo(dlRightClick);
-                        $("<dd>", { css: { float: "left", width: "50%" }, title: "layerWidth", class: "layerWidth" }).appendTo(dlRightClick);
-                        $("<dt>", { css: { float: "left", width: "50%" }, title: "layerHeight", text: "layerHeight" }).appendTo(dlRightClick);
-                        $("<dd>", { css: { float: "left", width: "50%" }, title: "layerHeight", class: "layerHeight" }).appendTo(dlRightClick);
+                        $("<label>", { css: { float: "left", width: "70%", fontWeight: "bold" }, title: "layerOrder", text: "layerOrder" }).appendTo(dlRightClick);
+                        $("<input>", { css: { float: "left", width: "30%", border: 0, backgroundColor: "transparent" }, title: "layerOrder", class: "layerOrder", readonly: true }).appendTo(dlRightClick);
+                        $("<label>", { css: { float: "left", width: "70%" }, title: "layerTop", text: "layerTop" }).appendTo(dlRightClick);
+                        $("<input>", { css: { float: "left", width: "30%", border: 0, backgroundColor: "transparent" }, title: "layerTop", class: "layerTop", type: "number" }).appendTo(dlRightClick);
+                        $("<label>", { css: { float: "left", width: "70%" }, title: "layerLeft", text: "layerLeft" }).appendTo(dlRightClick);
+                        $("<input>", { css: { float: "left", width: "30%", border: 0, backgroundColor: "transparent" }, title: "layerLeft", class: "layerLeft", type: "number" }).appendTo(dlRightClick);
+                        $("<label>", { css: { float: "left", width: "70%" }, title: "layerWidth", text: "layerWidth" }).appendTo(dlRightClick);
+                        $("<input>", { css: { float: "left", width: "30%", border: 0, backgroundColor: "transparent" }, title: "layerWidth", class: "layerWidth", type: "number" }).appendTo(dlRightClick);
+                        $("<label>", { css: { float: "left", width: "70%" }, title: "layerHeight", text: "layerHeight" }).appendTo(dlRightClick);
+                        $("<input>", { css: { float: "left", width: "30%", border: 0, backgroundColor: "transparent" }, title: "layerHeight", class: "layerHeight", type: "number" }).appendTo(dlRightClick);
                     }
+                    dlRightClick.on("keyup focusout", "input", viewer, $e.domEvents.onLayerResize);
                 }
             }
             return eligaScreenDiv;
@@ -115,35 +144,6 @@ function eliga_fabric(options) {
     });
 })(eliga_fabric);
 
-
-(function ($e) {
-    $e.Viewer = function (options) {
-        $.extend(true, this, $e.DEFAULT_SETTINGS, options);
-        if ($("#" + this.id).length < 1) {
-            throw "no matching division id";
-        }
-        this.layerRemoveArr = new Array();
-        this.edgeDetection = 40;
-        this.rightClick = true;
-        this.screenRatio = this.width / this.height;
-        this.canvasWidth = $("#" + this.id).width() - 10; //좌우 보더 값 뺀다.
-        this.canvasHeight = $("#" + this.id).height();
-        this.canvasHeight = this.canvasHeight == 0 ? Math.floor(this.canvasWidth / this.screenRatio) : this.canvasHeight;
-        this.lastDragoverTarget = null;
-        if (this.noScrollSize) {
-            console.log(window);
-            var height = typeof visualViewport === "object" ? visualViewport.height : window.innerHeight;
-            var noScrollHeight = height - 51 - 50 - 5; // 하단 바, 패딩, 보더.. (패딩,보더는 없어도 될 듯.)
-            this.canvasHeight = this.canvasHeight > noScrollHeight ? noScrollHeight : this.canvasHeight;
-            this.canvasWidth = Math.floor(this.canvasHeight * this.screenRatio);
-        }
-        this.canvasRatioW = this.canvasWidth / this.width;
-        this.canvasRatioH = this.canvasHeight / this.height;
-        $("#" + this.id).append($e.rectDomStructure(this));
-    };
-})(eliga_fabric);
-
-
 (function ($e) {
     $.extend($e, {
         iconHandler: {
@@ -165,7 +165,7 @@ function eliga_fabric(options) {
                 viewer.layerRemoveArr.push(activeobject);
                 activeobject.dom.remove();
                 $e.sortLayerDomIndex(canvas);
-                canvas.setActiveObject(canvas.item(canvas.getObjects().length - 1));
+                canvas.getObjects().length > 0 ? canvas.setActiveObject(canvas.item(canvas.getObjects().length - 1)) : null;
             },
             top: function (event) {
                 var viewer = event.data, canvas = viewer.canvas;
@@ -329,7 +329,7 @@ function eliga_fabric(options) {
                         tg.scaleY = tg.top > canvas.height - tg.getScaledHeight() ? (canvas.height - tg.top) / 100 : tg.scaleY;
                         tg.scaleX = tg.left > canvas.width - tg.getScaledWidth() ? (canvas.width - tg.left) / 100 : tg.scaleX;
                         break;
-                    case 0 : tg.__corner = viewer.__corner;
+                    case 0: tg.__corner = viewer.__corner;
                 }
                 if (tg.top > canvas.height - tg.getScaledHeight()) tg.top = canvas.height - tg.getScaledHeight();
                 if (tg.left > canvas.width - tg.getScaledWidth()) tg.left = canvas.width - tg.getScaledWidth();
@@ -360,24 +360,25 @@ function eliga_fabric(options) {
                 obj.dom.toggleClass("shake");
             }, 820);
         },
-        setRealPixelAndDomDrawing: function (tg) {
-            if(!tg) {return false;}
+        setRealPixelAndDomDrawing: function (tg, syncCanvasMatrix) {
+            if (!tg) { return false; }
+            if (typeof syncCanvasMatrix === "undefined") { syncCanvasMatrix = true; }
             var viewer = tg.canvas.viewer;
             var w = tg.getScaledWidth(), h = tg.getScaledHeight(), t = tg.top, l = tg.left;
-            tg.layerWidth = Math.round(w * (1 / viewer.canvasRatioW));
-            tg.layerHeight = Math.round(h * (1 / viewer.canvasRatioH));
-            tg.layerLeft = Math.round(l * (1 / viewer.canvasRatioW));
-            tg.layerTop = Math.round(t * (1 / viewer.canvasRatioH));
-            // tg.lockScalingX = false;
-            // tg.lockScalingY = false;
+            if (syncCanvasMatrix) {
+                tg.layerWidth = Math.round(w * (1 / viewer.canvasRatioW));
+                tg.layerHeight = Math.round(h * (1 / viewer.canvasRatioH));
+                tg.layerLeft = Math.round(l * (1 / viewer.canvasRatioW));
+                tg.layerTop = Math.round(t * (1 / viewer.canvasRatioH));
+            }
             tg.dom ? tg.dom.css({ width: w, height: h, top: t, left: l, display: "block" }) : $e.drawGroupDom(tg);
             if (viewer.popupRightClick) {
-                viewer.popupRightClick.css({ top: t + h + 15, left: l + 5 });
-                viewer.popupRightClick.find(".layerTop").text(tg.layerTop);
-                viewer.popupRightClick.find(".layerLeft").text(tg.layerLeft);
-                viewer.popupRightClick.find(".layerHeight").text(tg.layerHeight);
-                viewer.popupRightClick.find(".layerWidth").text(tg.layerWidth);
-                viewer.popupRightClick.find(".layerOrder").text(tg.canvas.getObjects().indexOf(tg) + 1);
+                viewer.popupRightClick.css({ top: t + h + 15, left: l + 5, backgroundColor : tg.fill });
+                viewer.popupRightClick.find(".layerTop").val(tg.layerTop);
+                viewer.popupRightClick.find(".layerLeft").val(tg.layerLeft);
+                viewer.popupRightClick.find(".layerHeight").val(tg.layerHeight);
+                viewer.popupRightClick.find(".layerWidth").val(tg.layerWidth);
+                viewer.popupRightClick.find(".layerOrder").val(tg.canvas.getObjects().indexOf(tg) + 1);
             }
         },
         drawGroupDom: function (tgs) {
@@ -457,5 +458,43 @@ function eliga_fabric(options) {
             canvas.setActiveObject(rect);
             canvas.renderAll();
         },
+    });
+})(eliga_fabric);
+
+
+(function ($e) {
+    $.extend($e, {
+        domEvents: {
+            onLayerResize: function (e) {
+                if (e.type == "keyup" && e.keyCode != 13) { return false; }
+                $e.resizeLayer(viewer);
+            }
+        },
+        resizeLayer: function (viewer) {
+            var canvas = viewer.canvas, tg = canvas.getActiveObject(), popupRightClick = viewer.popupRightClick;
+
+            tg.layerWidth = Number(popupRightClick.find('.layerWidth').val()) || 1;
+            tg.layerHeight = Number(popupRightClick.find('.layerHeight').val()) || 1;
+            tg.layerLeft = Number(popupRightClick.find('.layerLeft').val()) || 0;
+            tg.layerTop = Number(popupRightClick.find('.layerTop').val()) || 0;
+
+            if (tg.layerWidth > viewer.width) tg.layerWidth = viewer.width;
+            if (tg.layerHeight > viewer.height) tg.layerHeight = viewer.height;
+            if (tg.layerLeft > viewer.width - tg.layerWidth) tg.layerLeft = viewer.width - tg.layerWidth;
+            if (tg.layerTop > viewer.height - tg.layerHeight) tg.layerTop = viewer.height - tg.layerHeight;
+
+            var width = Math.floor(tg.layerWidth * viewer.canvasRatioW);
+            var height = Math.floor(tg.layerHeight * viewer.canvasRatioH);
+            var left = Math.floor(tg.layerLeft * viewer.canvasRatioW);
+            var top = Math.floor(tg.layerTop * viewer.canvasRatioH);
+
+            tg.scaleX = width / 100;
+            tg.scaleY = height / 100;
+            tg.left = left;
+            tg.top = top;
+            tg.setCoords();
+            $e.setRealPixelAndDomDrawing(tg, viewer.syncCanvasMatrix);
+            canvas.renderAll();
+        }
     });
 })(eliga_fabric);
