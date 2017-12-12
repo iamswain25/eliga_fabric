@@ -263,8 +263,8 @@ function eliga_fabric(options) {
             }
         },
         canvasHandler: {
-            selectionCreated: function (e) { $e.shake(e); $e.setRealPixelAndDomDrawing(e.target); },
-            selectionUpdated: function (e) { $e.shake(e); $e.setRealPixelAndDomDrawing(e.target); },
+            selectionCreated: function (e) { $e.shake(e.target.dom); $e.setRealPixelAndDomDrawing(e.target); },
+            selectionUpdated: function (e) { $e.shake(e.target.dom); $e.setRealPixelAndDomDrawing(e.target); },
             objectMoving: function (e) {
                 var tg = e.target, canvas = e.target.canvas, viewer = canvas.viewer;
                 if (viewer.edgeDetection) {
@@ -350,14 +350,14 @@ function eliga_fabric(options) {
                     var canvas = tg.canvas, viewer = canvas.viewer;
                     $e.setRealPixelAndDomDrawing(tg);
                     viewer.popupRightClick.show();
+                    $e.shake(viewer.popupRightClick);
                 }
             }
         },
-        shake: function (e) {
-            var obj = e.target, canvas = e.canvas;
-            obj.dom.toggleClass("shake");
+        shake: function (obj) {
+            obj.toggleClass("shake");
             setTimeout(function () {
-                obj.dom.toggleClass("shake");
+                obj.toggleClass("shake");
             }, 820);
         },
         setRealPixelAndDomDrawing: function (tg, syncCanvasMatrix) {
