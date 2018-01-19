@@ -1,6 +1,7 @@
 # eliga_fabric
 
-* 터치 가능한 eliga_fabric
+* fabricjs with dom structure
 * `<script>var viewer = eliga_fabric();</script>`
-* 기본 div 아이디는 eliga_fabric
-* div 먼저 그리고 script실행 해야함.
+* must have default div with id = "eliga_fabric" before start the script.
+
+* https://iamswain25.github.io/eliga_fabric/
